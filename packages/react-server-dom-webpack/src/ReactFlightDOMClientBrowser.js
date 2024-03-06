@@ -85,7 +85,14 @@ function createFromFetch<T>(
   const response: FlightResponse = createResponseFromOptions(options);
   promiseForResponse.then(
     function (r) {
-      startReadingFromStream(response, (r.body: any));
+        if(r.body){
+            startReadingFromStream(response, (r.body: any));
+        } else {
+            // https://github.com/vercel/next.js/issues/56641
+            r.blob().then(function (blob) {
+                startReadingFromStream(response, blob.stream());
+            })
+        }
     },
     function (e) {
       reportGlobalError(response, e);
